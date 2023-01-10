@@ -102,7 +102,7 @@ namespace DogGo.Repositories
                     cmd.Parameters.AddWithValue("@walkerId",walkerId);
 
                     SqlDataReader reader = cmd.ExecuteReader();
-                    List<Walks> walks = null;
+                    List<Walks> walks = new List<Walks>();
 
                     while (reader.Read())
                     {
@@ -110,7 +110,7 @@ namespace DogGo.Repositories
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Date = reader.GetDateTime(reader.GetOrdinal("Date")),
-                            Duration = reader.GetInt32(reader.GetOrdinal("Duration")),
+                            Duration = reader.GetInt32(reader.GetOrdinal("Duration"))/60,
                             WalkerId = reader.GetInt32(reader.GetOrdinal("WalkerId")),
                             DogId = reader.GetInt32(reader.GetOrdinal("DogId"))
                         };

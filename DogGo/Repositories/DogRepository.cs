@@ -1,6 +1,7 @@
 ﻿using DogGo.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 
 namespace DogGo.Repositories
@@ -56,14 +57,70 @@ namespace DogGo.Repositories
             }
         }
 
-        public Dog GetDogById()
+        public Dog GetDogById(int Id)
         {
-            throw new System.NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT *
+                                        FROM Dog
+                                        WHERE Id = @id";
+
+                    cmd.Parameters.AddWithValue("@id", Id);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        Dog dog = new Dog
+                        {
+                            Id = int.Parse(reader["Id"].ToString()),
+                            Name = reader["Name"].ToString(),
+                            OwnerId = int.Parse(reader["OwnerId"].ToString()),
+                            Breed = reader["Breed"].ToString(),
+                            Notes = reader["Notes"].ToString(),
+                            ImageUrl = reader["ImageUrl"].ToString()
+                        };
+
+                        reader.Close();
+                        return dog;
+                    }
+                    reader.Close();
+                    return null;
+                }
+                {
+
+                }
+            };
         }
 
         public void UpdateDog(Dog dog)
         {
-            throw new System.NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"UPDATE Dog
+                                        SET
+                                            Name = @name,
+                                            Breed = @breed,
+                                            Notes = @notes,
+                                            ImageUrl = @imageUrl
+                                        WHERE Id = @id";
+
+                    cmd.Parameters.AddWithValue("@name", dog.Name);
+                    cmd.Parameters.AddWithValue("@breed", dog.Breed);
+                    cmd.Parameters.AddWithValue("@notes", dog.Notes);
+                    cmd.Parameters.AddWithValue("@imageUrl", dog.ImageUrl);
+                    cmd.Parameters.AddWithValue("@id", dog.Id);
+
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
         public void AddDog(Dog dog)
         {
@@ -80,12 +137,29 @@ namespace DogGo.Repositories
                     cmd.Parameters.AddWithValue("@name", dog.Name);
                     cmd.Parameters.AddWithValue("@ownerId", dog.OwnerId);
                     cmd.Parameters.AddWithValue("@breed", dog.Breed);
-                    cmd.Parameters.AddWithValue("@notes", dog.Notes);
-                    cmd.Parameters.AddWithValue("@imageUrl", dog.ImageUrl);
 
-                    int id = (int)cmd.ExecuteScalar();
 
-                    dog.Id = id;
+                    if (dog.Notes == null)
+                    {
+                        cmd.Parameters.AddWithValue("@notes", DBNull.Value);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@notes", dog.Notes);
+                    }
+
+                    if (dog.ImageUrl == null)
+                    {
+                        cmd.Parameters.AddWithValue("@imageUrl", DBNull.Value);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@imageUrl", dog.ImageUrl);
+                    }
+
+                    int newlyCreatedId = (int)cmd.ExecuteScalar();
+
+                    dog.Id = newlyCreatedId;
                 }
             }
         }
@@ -137,9 +211,22 @@ namespace DogGo.Repositories
             }
         }
 
-        public void DeleteDog(Dog dog)
+        public void DeleteDog(int DogId)
         {
-            throw new System.NotImplementedException();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        DELETE FROM Dog
+                        WHERE Id = @id";
+
+                    cmd.Parameters.AddWithValue("@id", DogId);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
     }
 }

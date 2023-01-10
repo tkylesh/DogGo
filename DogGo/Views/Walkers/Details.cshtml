@@ -21,8 +21,38 @@
             <span>@Model.Walker.Neighborhood.Name</span>
         </div>
     </section>
+
+    <hr class="mt-5" />
+    <div class="clearfix"></div>
+
+    <div class="row">
+        <section class="col-8 container mt-5">
+            <h1>Recent Walks</h1>
+
+            <table style="width: 75%; table-layout: fixed;">
+                <tr>
+                    <th>Date</th>
+                    <th>Client</th>
+                    <th>Duration</th>
+                </tr>
+
+                @foreach (Walks walk in Model.AllWalks)
+                {
+                    <tr>
+                        <td>@walk.Date.ToShortDateString()</td>
+                        <td>@walk.DogId</td>
+                        <td>@walk.Duration</td>
+                    </tr>
+                }
+
+            </table>
+        </section>
+        <section class="col-4 container mt-5">
+            <h2>Total Walk Time: </h2>
+        </section>
+    </div>
 </div>
-<div>
+@*<div>
     @Html.ActionLink("Edit", "Edit", new {  id = Model.Walker.Id  }) |
     <a asp-action="Index">Back to List</a>
-</div>
+</div>*@
